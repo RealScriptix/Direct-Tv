@@ -374,9 +374,13 @@ async def get_channel_schedule(
     for schedule_data in schedules:
         program_data = await db.programs.find_one({"id": schedule_data["program_id"]})
         if program_data:
+            # Remove MongoDB _id field to avoid serialization issues
+            schedule_clean = {k: v for k, v in schedule_data.items() if k != '_id'}
+            program_clean = {k: v for k, v in program_data.items() if k != '_id'}
+            
             schedule_with_programs.append({
-                **schedule_data,
-                "program": Program(**program_data)
+                **schedule_clean,
+                "program": Program(**program_clean)
             })
     
     return schedule_with_programs
